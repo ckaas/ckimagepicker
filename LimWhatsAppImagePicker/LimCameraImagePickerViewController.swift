@@ -19,7 +19,7 @@ class LimCameraImagePicker: UIViewController,
 {
 
     var pickerController:UIImagePickerController?
-    var sourceType : UIImagePickerControllerSourceType?
+    var sourceType : UIImagePickerController.SourceType?
     var loadedImages: [UIImage] = []
     
     var selectedIndex : Int = -1
@@ -35,7 +35,7 @@ class LimCameraImagePicker: UIViewController,
     weak var delegate: LimCameraImagePickerDelegate?
     
     //AWS UPLOAD
-    var uploadFileURL: NSURL?
+    var uploadFileURL: URL?
     var tempIndex : Int = 0
     var tempImage: UIImage?;
     
@@ -52,56 +52,56 @@ class LimCameraImagePicker: UIViewController,
     override func loadView() {
         super.loadView()
         
-        collectionView.registerClass(LimCollectionViewCell.self, forCellWithReuseIdentifier: "Cell")
+        collectionView.register(LimCollectionViewCell.self, forCellWithReuseIdentifier: "Cell")
         self.automaticallyAdjustsScrollViewInsets = false
         
-        var nav = self.navigationController?.navigationBar
-        nav?.barStyle = UIBarStyle.Black
+        let nav = self.navigationController?.navigationBar
+        nav?.barStyle = UIBarStyle.black
         
         let gradient : CAGradientLayer = CAGradientLayer()
         gradient.frame = bgView.bounds
-        let cor1 = UIColor.lightGrayColor().CGColor
-        let cor2 = UIColor.darkGrayColor().CGColor
+        let cor1 = UIColor.lightGray.cgColor
+        let cor2 = UIColor.darkGray.cgColor
         let arrayColors = [cor1, cor2]
         gradient.colors = arrayColors
-        bgView.layer.insertSublayer(gradient, atIndex: 0)
+        bgView.layer.insertSublayer(gradient, at: 0)
         
         // Background view for images collection
-        bgView.layer.shadowColor = UIColor.blackColor().CGColor;
+        bgView.layer.shadowColor = UIColor.black.cgColor;
         bgView.layer.shadowRadius = 3.0
         bgView.layer.shadowOpacity = 0.15
         
         // Customize default ImageView
         imageView.layer.masksToBounds = true;
-        imageView.layer.shadowColor = UIColor.blackColor().CGColor;
+        imageView.layer.shadowColor = UIColor.black.cgColor;
         imageView.layer.shadowOpacity = 0.3;
         imageView.layer.shadowRadius = 6.0;
         
-        if sourceType? == nil {
+        if sourceType == nil {
             // Picker Controller Init
             pickerController =  UIImagePickerController()
             pickerController!.delegate = self
-            pickerController!.sourceType = UIImagePickerControllerSourceType.PhotoLibrary
-            sourceType = UIImagePickerControllerSourceType.PhotoLibrary
+            pickerController!.sourceType = UIImagePickerControllerSourceType.photoLibrary
+            sourceType = UIImagePickerControllerSourceType.photoLibrary
         }
         
         // Btn Remover
-        btnRemover.backgroundColor = UIColor.whiteColor()
+        btnRemover.backgroundColor = UIColor.white
         btnRemover.layer.cornerRadius = 15.0;
 
     }
     
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        // Set buttons to navigation
-        var cancelButton = UIBarButtonItem(title: "Cancel", style: UIBarButtonItemStyle.Plain, target: self, action: "cancelPicker")
-        var doneButton = UIBarButtonItem(title: "Done", style: UIBarButtonItemStyle.Done, target: self, action: "donePicker")
+        // Set buttons for navigation
+        let cancelButton = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(cancelPicker))
+        let doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(donePicker))
         
-        navigationController?.navigationBarHidden = false
+        navigationController?.isNavigationBarHidden = false
         
-        navigationItem.setLeftBarButtonItem(cancelButton, animated: true)
-        navigationItem.setRightBarButtonItem(doneButton, animated: true)
+        navigationItem.setLeftBarButton(cancelButton, animated: true)
+        navigationItem.setRightBarButton(doneButton, animated: true)
         
         collectionView.reloadData()
         selectLastImage()
@@ -109,33 +109,27 @@ class LimCameraImagePicker: UIViewController,
         
     }
     
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
-    
-    
     @IBAction func removeImage(sender: AnyObject) {
         if isuploading {return }
-        loadedImages.removeAtIndex(selectedIndex)
+        loadedImages.remove(at: selectedIndex)
         collectionView.reloadData()
         
         if loadedImages.count > 0 {
             selectLastImage()
             setCurrentImage()
         } else {
-            self.dismissViewControllerAnimated(true, completion: nil)
+            self.dismiss(animated: true, completion: nil)
         }
     }
     
     // MARK: - uiCollectionView Datasource Methods
     
-    func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return loadedImages.count + 1
     }
     
-    func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
-        var cell = collectionView.dequeueReusableCellWithReuseIdentifier("Cell", forIndexPath: indexPath) as LimCollectionViewCell
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "Cell", for: indexPath) as! LimCollectionViewCell
         
         if indexPath.row == loadedImages.count {
             cell.styleAddButton()
@@ -150,13 +144,15 @@ class LimCameraImagePicker: UIViewController,
     
     // MARK: - uiCollectionView Datasource Methods
     
-    func collectionView(collectionView: UICollectionView,   didSelectItemAtIndexPath indexPath: NSIndexPath) {
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         
         if indexPath.row == loadedImages.count {
-            var dispatchTime: dispatch_time_t = dispatch_time(DISPATCH_TIME_NOW, Int64(0.1 * Double(NSEC_PER_SEC)))
-                dispatch_after(dispatchTime, dispatch_get_main_queue(), {
-                self.presentCameraView()
-            })
+            self.presentCameraView()
+//            // TODO: fix later!
+//            let delayTime = DispatchTime.now() + 0.1
+//            DispatchQueue.main.asyncAfter(deadline: delayTime) {
+//                self.presentCameraView()
+//            }
         }else{
             selectedIndex = indexPath.row;
             setCurrentImage()
@@ -164,36 +160,36 @@ class LimCameraImagePicker: UIViewController,
     }
     
     func presentCameraView () {
-        var newpicker =  UIImagePickerController()
+        let newpicker =  UIImagePickerController()
         newpicker.delegate = self
         newpicker.sourceType = sourceType!
-        newpicker.editing = false
+        newpicker.isEditing = false
         
-        if (newpicker.sourceType == UIImagePickerControllerSourceType.Camera) {
+        if (newpicker.sourceType == UIImagePickerControllerSourceType.camera) {
             newpicker.showsCameraControls = true
         }
         
-        self.presentViewController(newpicker, animated: true, completion: nil)
+        self.present(newpicker, animated: true, completion: nil)
     }
     
     // MARK: - imagePickerController and actionsheet Delegate Methods
     
-    func imagePickerControllerDidCancel(picker: UIImagePickerController) {
-        picker.dismissViewControllerAnimated(true, completion: {})
+    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        picker.dismiss(animated: true, completion: {})
     }
-    
-    func imagePickerController(picker: UIImagePickerController!, didFinishPickingMediaWithInfo info:NSDictionary!) {
-        
-        let mediaType = info[UIImagePickerControllerMediaType] as String
+
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
+
+        let mediaType = info[UIImagePickerControllerMediaType] as! CFString
         
         if mediaType == kUTTypeImage {
             
-            var originalImage = info[UIImagePickerControllerOriginalImage] as UIImage
-            var editedImage = info[UIImagePickerControllerEditedImage] as UIImage?
-            var imageToUse = editedImage != nil ? editedImage : originalImage
+            let originalImage = info[UIImagePickerControllerOriginalImage] as! UIImage
+            let editedImage = info[UIImagePickerControllerEditedImage] as? UIImage
+            let imageToUse = editedImage != nil ? editedImage : originalImage
             
             loadedImages.append(imageToUse!)
-            picker.dismissViewControllerAnimated(true, nil)
+            picker.dismiss(animated: true, completion: nil)
             
         } else {
           /*  let tempImage = info[UIImagePickerControllerMediaURL] as NSURL!
@@ -204,17 +200,17 @@ class LimCameraImagePicker: UIViewController,
             UISaveVideoAtPathToSavedPhotosAlbum(pathString, self, nil, nil)
             println("Video Taken!!!!"); */
             
-            picker.dismissViewControllerAnimated(true, completion: {})
+            picker.dismiss(animated: true, completion: {})
         }
     }
     
     // MARK:- UI navigation bar delegate
     
-    func navigationController(navigationController: UINavigationController!,
-        willShowViewController viewController: UIViewController,
-        animated: Bool) {
+    func navigationController(_ navigationController: UINavigationController,
+                              willShow viewController: UIViewController,
+                              animated: Bool) {
             
-        navigationController.navigationBar.barStyle = UIBarStyle.Black
+        navigationController.navigationBar.barStyle = UIBarStyle.black
     }
     
     
@@ -223,7 +219,7 @@ class LimCameraImagePicker: UIViewController,
     func cancelPicker () {
         if isuploading {return}
         loadedImages.removeAll()
-        self.delegate?.cancelPicking(self)
+        self.delegate?.cancelPicking(picker: self)
     }
     
     func donePicker () {
@@ -248,22 +244,22 @@ class LimCameraImagePicker: UIViewController,
         let timestamp = NSInteger(date.timeIntervalSince1970)
         let S3UploadKeyName = String(timestamp)
         
-        println(S3UploadKeyName)
+        print(S3UploadKeyName)
         
         //Create a test file in the temporary directory
-        self.uploadFileURL = NSURL.fileURLWithPath(NSTemporaryDirectory() + S3UploadKeyName)
-        println(self.uploadFileURL)
+        self.uploadFileURL = URL(fileURLWithPath: NSTemporaryDirectory() + S3UploadKeyName)
+        guard let uploadURL = self.uploadFileURL else { return }
+        print(uploadURL.absoluteString)
         
         tempImage = loadedImages[tempIndex]
-        let data = UIImageJPEGRepresentation(tempImage, 0.5)
+        let data = UIImageJPEGRepresentation(tempImage!, 0.5)
         
-        var error: NSError? = nil
-        if NSFileManager.defaultManager().fileExistsAtPath(self.uploadFileURL!.path!) {
-            NSFileManager.defaultManager().removeItemAtPath(self.uploadFileURL!.path!, error: &error)
+        if FileManager.default.fileExists(atPath: uploadURL.absoluteString) {
+            try? FileManager.default.removeItem(at: self.uploadFileURL!)
         }
-        
-        data.writeToURL(self.uploadFileURL!, atomically: true)
-        
+
+        try? data?.write(to: uploadURL, options: [.atomic])
+
 /*        let uploadRequest1 : AWSS3TransferManagerUploadRequest = AWSS3TransferManagerUploadRequest()
         let transferManager = AWSS3TransferManager.defaultS3TransferManager()
         
@@ -307,7 +303,7 @@ class LimCameraImagePicker: UIViewController,
 
 */
         //remove this code when you activate above commented code
-        self.delegate?.donePicking(self, didPickedUrls: self.loadedUrls)
+        self.delegate?.donePicking(picker: self, didPickedUrls: self.loadedUrls)
 
     }
     
@@ -318,26 +314,25 @@ class LimCameraImagePicker: UIViewController,
     func selectLastImage () {
         if loadedImages.count > 0  {
             selectedIndex = loadedImages.count-1 ;
-            collectionView.selectItemAtIndexPath(NSIndexPath(forItem: selectedIndex, inSection: 0), animated: true, scrollPosition: UICollectionViewScrollPosition.Right)
+            collectionView.selectItem(at: IndexPath(item: selectedIndex, section: 0), animated: true, scrollPosition: UICollectionViewScrollPosition.right)
         } else {
             selectedIndex = -1;
         }
-        
     }
     
     func setCurrentImage () {
         if selectedIndex == -1 {  return }
         
         imageView.image = loadedImages[selectedIndex]
-        var height = imageView.image!.size.height * imageView.frame.size.width / imageView.image!.size.width
-        imageView.bounds = CGRectMake(imageView.bounds.origin.x, imageView.bounds.origin.y, imageView.bounds.size.width, height);
+        let height = imageView.image!.size.height * imageView.frame.size.width / imageView.image!.size.width
+        imageView.bounds = CGRect(x: imageView.bounds.origin.x, y: imageView.bounds.origin.y, width: imageView.bounds.size.width, height: height);
         
         // Positioning button x
-        var btX = (imageView.center.x - (imageView.frame.size.width/2)) - 15;
-        var btY = (imageView.center.y - (imageView.frame.size.height/2)) - 15;
-        btnRemover.frame = CGRectMake(btX, btY, btnRemover.frame.size.width, btnRemover.frame.size.height);
+        let btX = (imageView.center.x - (imageView.frame.size.width/2)) - 15;
+        let btY = (imageView.center.y - (imageView.frame.size.height/2)) - 15;
+        btnRemover.frame = CGRect(x: btX, y: btY, width: btnRemover.frame.size.width, height: btnRemover.frame.size.height);
         
-        mainBgView.bringSubviewToFront(btnRemover)
+        mainBgView.bringSubview(toFront: btnRemover)
     }
     
     internal func setSourceType (type: UIImagePickerControllerSourceType) {
@@ -347,7 +342,7 @@ class LimCameraImagePicker: UIViewController,
         pickerController!.delegate = self
         pickerController!.sourceType = type
         
-        if type == UIImagePickerControllerSourceType.Camera {
+        if type == UIImagePickerControllerSourceType.camera {
             pickerController!.showsCameraControls = true
         }
     }

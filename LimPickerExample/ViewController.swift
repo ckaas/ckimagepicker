@@ -11,7 +11,7 @@ import MediaPlayer
 import MobileCoreServices
 import AVFoundation
 
-
+@objc
 class ViewController: UIViewController ,UIImagePickerControllerDelegate, UINavigationControllerDelegate,  UIActionSheetDelegate,   LimCameraImagePickerDelegate {
 
     
@@ -26,81 +26,79 @@ class ViewController: UIViewController ,UIImagePickerControllerDelegate, UINavig
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-    
+
+    @objc
     @IBAction func OpenCamera(sender: AnyObject) {
         var actionSheet:UIActionSheet
-        if(UIImagePickerController .isSourceTypeAvailable(UIImagePickerControllerSourceType.Camera)){
+        if(UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.camera)){
             actionSheet = UIActionSheet(title: nil, delegate: self, cancelButtonTitle: "Cancel", destructiveButtonTitle: nil,otherButtonTitles:"Select photo from library", "Take a picture", "Take a video")
         } else {
             actionSheet = UIActionSheet(title: nil , delegate: self, cancelButtonTitle: "Cancel", destructiveButtonTitle: nil,otherButtonTitles:"Select photo from library")
         }
         actionSheet.delegate = self
-        actionSheet.showInView(self.view)
+        actionSheet.show(in: self.view)
     }
     
     
     // MARK: - imagePickerController and actionsheet Delegate Methods
     
-    func imagePickerController(picker: UIImagePickerController!, didFinishPickingMediaWithInfo info:NSDictionary!) {
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info:[String : Any]) {
         
-        let mediaType = info[UIImagePickerControllerMediaType] as String
+        let mediaType = info[UIImagePickerControllerMediaType] as? String
         
-        if mediaType == kUTTypeImage {
-            limPicker = LimCameraImagePicker(nibName: "PickerView", bundle: NSBundle.mainBundle())
-            limPicker!.setSourceType(picker.sourceType)
-            var image = info[UIImagePickerControllerOriginalImage] as UIImage
-            limPicker!.addImage(image)
+        if mediaType == kUTTypeImage as String {
+            limPicker = LimCameraImagePicker(nibName: "PickerView", bundle: Bundle.main)
+            limPicker!.setSourceType(type: picker.sourceType)
+            let image = info[UIImagePickerControllerOriginalImage] as! UIImage
+            limPicker!.addImage(image: image)
             limPicker!.delegate = self
             
             self.navigationController!.pushViewController(limPicker!, animated: true)
-            picker.dismissViewControllerAnimated(true, nil)
+            picker.dismiss(animated: true, completion: nil)
         } else {
-            self.dismissViewControllerAnimated(true, completion: {})
-            println("Video Taken!!!!");
+            self.dismiss(animated: true, completion: {})
+            print("Video Taken!!!!");
         }
         
     }
     
-    func actionSheet(actionSheet: UIActionSheet, clickedButtonAtIndex buttonIndex: Int) {
-        println("Title : \(actionSheet.buttonTitleAtIndex(buttonIndex))")
-        println("Button Index : \(buttonIndex)")
+    func actionSheet(_ actionSheet: UIActionSheet, clickedButtonAt buttonIndex: Int) {
+        print("Title : \(String(describing: actionSheet.buttonTitle(at: buttonIndex)))")
+        print("Button Index : \(buttonIndex)")
         
         if buttonIndex == 0 { return }
         
         let imageController = UIImagePickerController()
-        imageController.editing = false
+        imageController.isEditing = false
         imageController.delegate = self;
         
         if( buttonIndex == 1){
-            imageController.sourceType = UIImagePickerControllerSourceType.PhotoLibrary
+            imageController.sourceType = UIImagePickerControllerSourceType.photoLibrary
         } else if(buttonIndex == 2){
-            imageController.sourceType = UIImagePickerControllerSourceType.Camera
+            imageController.sourceType = UIImagePickerControllerSourceType.camera
             imageController.showsCameraControls = true
         } else {
-            imageController.sourceType = UIImagePickerControllerSourceType.Camera
-            imageController.mediaTypes = [kUTTypeMovie!]
+            imageController.sourceType = UIImagePickerControllerSourceType.camera
+            imageController.mediaTypes = [kUTTypeMovie as String]
             imageController.allowsEditing = false
             imageController.showsCameraControls = true
         }
         
-        self.presentViewController(imageController, animated: true, completion: nil)
+        self.present(imageController, animated: true, completion: nil)
     }
 
     // MARK: - LimCameraImagePickerDelegate Methods
     
     func donePicking(picker: LimCameraImagePicker, didPickedUrls: [String]) {
-        
-        dispatch_async(dispatch_get_main_queue(), {
+        DispatchQueue.main.async {
             // update some UI
             self.cleanProcessOnPicking()
-        })
-        
-        //Do something with uploaded urls
-        
+
+        }
     }
     
     func cleanProcessOnPicking() {
-        self.navigationController!.popViewControllerAnimated(true)
+        self.navigationController!.popViewController(animated: true)
     }
     
     func cancelPicking(picker: LimCameraImagePicker) {
