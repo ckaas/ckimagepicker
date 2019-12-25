@@ -41,6 +41,13 @@ class CKImagePickerViewController: UIViewController,
     @IBOutlet weak var buttonLeadingConstraint: NSLayoutConstraint!
     @IBOutlet weak var buttonTopConstraint: NSLayoutConstraint!
 
+    @objc
+    var tintColor = UIButton.appearance().tintColor {
+        didSet {
+            self.btnRemover?.tintColor = tintColor
+            collectionView?.reloadData()
+        }
+    }
 
     @objc
     weak var delegate: CKImagePickerDelegate?
@@ -141,6 +148,7 @@ class CKImagePickerViewController: UIViewController,
 
         let cellIdentifier = isAddButtonCell ? "CellButton" : "Cell"
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellIdentifier, for: indexPath) as! CKCollectionViewCell
+        cell.tintColor = tintColor
         
         if isAddButtonCell {
             cell.styleAddButton()
