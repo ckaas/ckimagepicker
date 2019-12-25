@@ -18,7 +18,6 @@ protocol CKImagePickerDelegate: class {
     func ckImagePickerViewControllerDidCancel(_ picker: CKImagePickerViewController)
 }
 
-
 @objc
 class CKImagePickerViewController: UIViewController,
     UICollectionViewDelegateFlowLayout,
@@ -26,11 +25,11 @@ class CKImagePickerViewController: UIViewController,
     UIImagePickerControllerDelegate,
     UINavigationControllerDelegate
 {
-    var pickerController:UIImagePickerController?
-    var sourceType : UIImagePickerController.SourceType?
-    var loadedImages = [UIImage]()
+    fileprivate var pickerController:UIImagePickerController?
+    fileprivate var sourceType : UIImagePickerController.SourceType?
+    fileprivate var loadedImages = [UIImage]()
     
-    var selectedIndex : Int = nothingSelected
+    fileprivate var selectedIndex : Int = nothingSelected
     
     @IBOutlet var mainBgView: UIView!
     @IBOutlet var btnRemover: UIButton!
@@ -42,7 +41,8 @@ class CKImagePickerViewController: UIViewController,
     @IBOutlet weak var buttonLeadingConstraint: NSLayoutConstraint!
     @IBOutlet weak var buttonTopConstraint: NSLayoutConstraint!
 
-    
+
+    @objc
     weak var delegate: CKImagePickerDelegate?
 
     @objc
@@ -72,20 +72,6 @@ class CKImagePickerViewController: UIViewController,
         let nav = self.navigationController?.navigationBar
         nav?.barStyle = UIBarStyle.black
 
-        
-//        let gradient : CAGradientLayer = CAGradientLayer()
-//        gradient.frame = bgView.bounds
-//        let cor1 = UIColor.lightGray.cgColor
-//        let cor2 = UIColor.darkGray.cgColor
-//        let arrayColors = [cor1, cor2]
-//        gradient.colors = arrayColors
-//        bgView.layer.insertSublayer(gradient, at: 0)
-
-        // Background view for images collection
-//        bgView.layer.shadowColor = UIColor.black.cgColor;
-//        bgView.layer.shadowRadius = 3.0
-//        bgView.layer.shadowOpacity = 0.15
-
         // Customize default ImageView
         imageView.layer.masksToBounds = true;
         imageView.layer.shadowColor = UIColor.black.cgColor;
@@ -102,10 +88,6 @@ class CKImagePickerViewController: UIViewController,
 
         // Btn Remover
         buttonBackgroundView.layer.cornerRadius = 5.0
-//        btnRemover.backgroundColor = UIColor.lightGray
-//        btnRemover.layer.cornerRadius = 15.0;
-
-
     }
     
     override func viewWillAppear(_ animated: Bool) {
