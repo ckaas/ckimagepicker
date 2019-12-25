@@ -1,15 +1,12 @@
 //
-//  LimPickerExampleTests.swift
-//  LimPickerExampleTests
-//
-//  Created by MyAdmin on 3/5/15.
-//  Copyright (c) 2015 MyAdmin. All rights reserved.
+//  CKPickerExampleTests.swift
+//  CKPickerExampleTests
 //
 
 import UIKit
 import XCTest
 
-class LimPickerExampleTests: XCTestCase {
+class CKPickerExampleTests: XCTestCase {
     
     override func setUp() {
         super.setUp()

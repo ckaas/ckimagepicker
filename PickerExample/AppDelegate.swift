@@ -1,9 +1,6 @@
 //
 //  AppDelegate.swift
-//  LimPickerExample
-//
-//  Created by MyAdmin on 3/5/15.
-//  Copyright (c) 2015 MyAdmin. All rights reserved.
+//  CKPickerExample
 //
 
 import UIKit

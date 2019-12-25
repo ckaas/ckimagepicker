@@ -10,6 +10,16 @@ import QuartzCore
 
 fileprivate let nothingSelected: Int = -1
 
+@objc
+protocol CKImagePickerDelegate: class {
+    @objc
+    func ckImagePickerViewController(_ picker: CKImagePickerViewController, didFinishPickingWith images: [UIImage])
+    @objc
+    func ckImagePickerViewControllerDidCancel(_ picker: CKImagePickerViewController)
+}
+
+
+@objc
 class CKImagePickerViewController: UIViewController,
     UICollectionViewDelegateFlowLayout,
     UICollectionViewDataSource,
@@ -35,6 +45,7 @@ class CKImagePickerViewController: UIViewController,
     
     weak var delegate: CKImagePickerDelegate?
 
+    @objc
     static func ckImagePickerViewController() -> CKImagePickerViewController {
         let storyboard = UIStoryboard(name: "CKImagePickerViewController", bundle: nil)
         guard let ckImagePickerViewController = storyboard.instantiateViewController(identifier: "CKImagePickerViewController") as? CKImagePickerViewController
@@ -44,13 +55,15 @@ class CKImagePickerViewController: UIViewController,
         return ckImagePickerViewController
     }
 
-    static func ckImagePickerViewControllerWrappedInNavigationController() -> (UINavigationController, CKImagePickerViewController) {
+    @objc
+    static func ckImagePickerViewControllerWrappedInNavigationController() -> UINavigationController {
         let ckImagePickerViewController = CKImagePickerViewController.ckImagePickerViewController()
         let navigationController = UINavigationController(rootViewController: ckImagePickerViewController)
         navigationController.navigationBar.barStyle = UIBarStyle.black
 
-        return (navigationController, ckImagePickerViewController)
+        return navigationController
     }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -269,11 +282,6 @@ class CKImagePickerViewController: UIViewController,
             pickerController!.showsCameraControls = true
         }
     }
-}
-
-protocol CKImagePickerDelegate: class {
-    func ckImagePickerViewController(_ picker: CKImagePickerViewController, didFinishPickingWith images: [UIImage])
-    func ckImagePickerViewControllerDidCancel(_ picker: CKImagePickerViewController)
 }
 
 // Helper function inserted by Swift 4.2 migrator.

@@ -1,9 +1,6 @@
 //
 //  ViewController.swift
-//  LimPickerExample
-//
-//  Created by MyAdmin on 3/5/15.
-//  Copyright (c) 2015 MyAdmin. All rights reserved.
+//  CKPickerExample
 //
 
 import UIKit
@@ -12,15 +9,7 @@ import MobileCoreServices
 import AVFoundation
 
 @objc
-class ViewController: UIViewController,
-//                        UIImagePickerControllerDelegate,
-                        UINavigationControllerDelegate,
-                        UIActionSheetDelegate,
-                        CKImagePickerDelegate
-{
-
-    
-    var limPicker:CKImagePickerViewController?
+class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -55,17 +44,18 @@ class ViewController: UIViewController,
     }
 
     func launchPickerController(sourceType: UIImagePickerController.SourceType) {
-        let (navigationController, pickerViewController) = CKImagePickerViewController.ckImagePickerViewControllerWrappedInNavigationController()
+        let navigationController = CKImagePickerViewController.ckImagePickerViewControllerWrappedInNavigationController()
+        guard let pickerViewController = navigationController.viewControllers.first as? CKImagePickerViewController
+            else { return }
         pickerViewController.delegate = self
         pickerViewController.setSourceType(type: sourceType)
         self.present(navigationController, animated: true, completion: nil)
     }
-    
-    
-    // MARK: - CKImagePickerViewController delegate
-    
 
-    // MARK: - CKImagePickerViewControllerDelegate Methods
+}
+
+// MARK: - CKImagePickerViewControllerDelegate
+extension ViewController: CKImagePickerDelegate {
     func ckImagePickerViewController(_ picker: CKImagePickerViewController, didFinishPickingWith images: [UIImage]) {
         DispatchQueue.main.async {
             // update some UI
@@ -84,7 +74,6 @@ class ViewController: UIViewController,
 
         }
     }
-    
 }
 
 
