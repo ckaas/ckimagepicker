@@ -26,11 +26,9 @@ class CKImagePickerViewController: UIViewController,
     UINavigationControllerDelegate
 {
     fileprivate var pickerController:UIImagePickerController?
-    fileprivate var sourceType : UIImagePickerController.SourceType?
     fileprivate var loadedImages = [UIImage]()
-    
     fileprivate var selectedIndex : Int = nothingSelected
-    
+
     @IBOutlet var mainBgView: UIView!
     @IBOutlet var btnRemover: UIButton!
     @IBOutlet weak var buttonBackgroundView: UIView!
@@ -40,6 +38,19 @@ class CKImagePickerViewController: UIViewController,
 
     @IBOutlet weak var buttonLeadingConstraint: NSLayoutConstraint!
     @IBOutlet weak var buttonTopConstraint: NSLayoutConstraint!
+
+
+    @objc
+    var imagePickerControllerSourceType: Int {
+        get {
+            return self.sourceType.rawValue
+        }
+        set {
+            self.sourceType = UIImagePickerController.SourceType(rawValue: newValue) ?? UIImagePickerController.SourceType.photoLibrary
+        }
+    }
+
+    var sourceType : UIImagePickerController.SourceType = UIImagePickerController.SourceType.photoLibrary
 
     @objc
     var tintColor = UIButton.appearance().tintColor {
@@ -174,7 +185,7 @@ class CKImagePickerViewController: UIViewController,
     func presentPickerViewController () {
         let newpicker =  UIImagePickerController()
         newpicker.delegate = self
-        newpicker.sourceType = sourceType!
+        newpicker.sourceType = sourceType
         newpicker.isEditing = false
         
         if (newpicker.sourceType == UIImagePickerController.SourceType.camera) {
