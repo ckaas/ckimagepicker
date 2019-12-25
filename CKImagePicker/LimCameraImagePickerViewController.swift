@@ -24,9 +24,14 @@ class CKImagePickerViewController: UIViewController,
     
     @IBOutlet var mainBgView: UIView!
     @IBOutlet var btnRemover: UIButton!
+    @IBOutlet weak var buttonBackgroundView: UIView!
     @IBOutlet var imageView: UIImageView!
     @IBOutlet var bgView: UIView!
     @IBOutlet var collectionView: UICollectionView!
+
+    @IBOutlet weak var buttonLeadingConstraint: NSLayoutConstraint!
+    @IBOutlet weak var buttonTopConstraint: NSLayoutConstraint!
+
     
     weak var delegate: CKImagePickerDelegate?
 
@@ -54,18 +59,19 @@ class CKImagePickerViewController: UIViewController,
         let nav = self.navigationController?.navigationBar
         nav?.barStyle = UIBarStyle.black
 
-        let gradient : CAGradientLayer = CAGradientLayer()
-        gradient.frame = bgView.bounds
-        let cor1 = UIColor.lightGray.cgColor
-        let cor2 = UIColor.darkGray.cgColor
-        let arrayColors = [cor1, cor2]
-        gradient.colors = arrayColors
-        bgView.layer.insertSublayer(gradient, at: 0)
+        
+//        let gradient : CAGradientLayer = CAGradientLayer()
+//        gradient.frame = bgView.bounds
+//        let cor1 = UIColor.lightGray.cgColor
+//        let cor2 = UIColor.darkGray.cgColor
+//        let arrayColors = [cor1, cor2]
+//        gradient.colors = arrayColors
+//        bgView.layer.insertSublayer(gradient, at: 0)
 
         // Background view for images collection
-        bgView.layer.shadowColor = UIColor.black.cgColor;
-        bgView.layer.shadowRadius = 3.0
-        bgView.layer.shadowOpacity = 0.15
+//        bgView.layer.shadowColor = UIColor.black.cgColor;
+//        bgView.layer.shadowRadius = 3.0
+//        bgView.layer.shadowOpacity = 0.15
 
         // Customize default ImageView
         imageView.layer.masksToBounds = true;
@@ -82,8 +88,9 @@ class CKImagePickerViewController: UIViewController,
         }
 
         // Btn Remover
+        buttonBackgroundView.layer.cornerRadius = 5.0
 //        btnRemover.backgroundColor = UIColor.lightGray
-        btnRemover.layer.cornerRadius = 15.0;
+//        btnRemover.layer.cornerRadius = 15.0;
 
 
     }
@@ -117,8 +124,8 @@ class CKImagePickerViewController: UIViewController,
     
     @IBAction func removeImage(sender: AnyObject) {
         loadedImages.remove(at: selectedIndex)
-        collectionView.reloadData()
-        
+        collectionView.deleteItems(at: [IndexPath(row: selectedIndex, section: 0)])
+
         if loadedImages.count > 0 {
             selectLastImage()
             setCurrentImage()
@@ -155,11 +162,6 @@ class CKImagePickerViewController: UIViewController,
         
         if indexPath.row == loadedImages.count {
             self.presentPickerViewController()
-//            // TODO: fix later!
-//            let delayTime = DispatchTime.now() + 0.1
-//            DispatchQueue.main.asyncAfter(deadline: delayTime) {
-//                self.presentCameraView()
-//            }
         }else{
             selectedIndex = indexPath.row;
             setCurrentImage()
@@ -186,7 +188,6 @@ class CKImagePickerViewController: UIViewController,
     }
 
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-// Local variable inserted by Swift 4.2 migrator.
         let info = convertFromUIImagePickerControllerInfoKeyDictionary(info)
 
         if let mediaType = info[convertFromUIImagePickerControllerInfoKey(UIImagePickerController.InfoKey.mediaType)] as? String,
@@ -224,12 +225,16 @@ class CKImagePickerViewController: UIViewController,
     fileprivate func addImage (image:UIImage!)  {
         loadedImages.append(image)
         collectionView?.reloadData()
+        selectLastImage()
+        // run they selection later in runLoop
+        DispatchQueue.main.async { [weak self] in
+            self?.setCurrentImage()
+        }
     }
     
     func selectLastImage () {
         if loadedImages.count > 0  {
             selectedIndex = loadedImages.count - 1 ;
-            collectionView.selectItem(at: IndexPath(item: selectedIndex, section: 0), animated: true, scrollPosition: UICollectionView.ScrollPosition.right)
         } else {
             selectedIndex = nothingSelected;
             btnRemover.isHidden = true
@@ -240,7 +245,17 @@ class CKImagePickerViewController: UIViewController,
         if selectedIndex == nothingSelected { return }
         
         imageView.image = loadedImages[selectedIndex]
+        collectionView.selectItem(at: IndexPath(row: selectedIndex, section: 0), animated: true, scrollPosition: .right)
         btnRemover.isHidden = false
+//        let imageDrawnRect = self.imageView.contentClippingRect
+//        buttonTopConstraint.constant = -44 - trunc(imageDrawnRect.origin.y)
+//        buttonLeadingConstraint.constant = -44 - trunc(imageDrawnRect.origin.x)
+//        view.layoutIfNeeded()
+//        UIView.animate(withDuration: 0.3) { [weak self] in
+//            self?.buttonTopConstraint.constant = -44 - trunc(imageDrawnRect.origin.y)
+//            self?.buttonLeadingConstraint.constant = -44 - trunc(imageDrawnRect.origin.x)
+//            self?.view.layoutIfNeeded()
+//        }
     }
     
     internal func setSourceType (type: UIImagePickerController.SourceType) {
@@ -269,4 +284,25 @@ fileprivate func convertFromUIImagePickerControllerInfoKeyDictionary(_ input: [U
 // Helper function inserted by Swift 4.2 migrator.
 fileprivate func convertFromUIImagePickerControllerInfoKey(_ input: UIImagePickerController.InfoKey) -> String {
 	return input.rawValue
+}
+
+fileprivate extension UIImageView {
+    var contentClippingRect: CGRect {
+        guard let image = image else { return bounds }
+        guard contentMode == .scaleAspectFit else { return bounds }
+        guard image.size.width > 0 && image.size.height > 0 else { return bounds }
+
+        let scale: CGFloat
+        if image.size.width > image.size.height {
+            scale = bounds.width / image.size.width
+        } else {
+            scale = bounds.height / image.size.height
+        }
+
+        let size = CGSize(width: image.size.width * scale, height: image.size.height * scale)
+        let x = (bounds.width - size.width) / 2.0
+        let y = (bounds.height - size.height) / 2.0
+
+        return CGRect(x: x, y: y, width: size.width, height: size.height)
+    }
 }
