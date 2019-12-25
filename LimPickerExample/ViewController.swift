@@ -29,7 +29,7 @@ class ViewController: UIViewController,
 
     @objc
     @IBAction func OpenCamera(sender: AnyObject) {
-        let alertController = UIAlertController(title: "", message: "", preferredStyle: .actionSheet)
+        let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
         let photoAction = UIAlertAction(title: "Select photo from library", style: .default) { (_) in
             self.launchPickerController(sourceType: .photoLibrary)
         }
