@@ -96,7 +96,7 @@ class CKImagePickerViewController: UIViewController,
         imageView.layer.shadowOpacity = 0.3;
         imageView.layer.shadowRadius = 6.0;
 
-        if sourceType == nil {
+        if pickerController == nil {
             // Picker Controller Init
             pickerController =  UIImagePickerController()
             pickerController!.delegate = self
