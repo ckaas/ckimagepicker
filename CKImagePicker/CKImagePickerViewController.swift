@@ -66,7 +66,7 @@ class CKImagePickerViewController: UIViewController,
     @objc
     static func ckImagePickerViewController() -> CKImagePickerViewController {
         let storyboard = UIStoryboard(name: "CKImagePickerViewController", bundle: nil)
-        guard let ckImagePickerViewController = storyboard.instantiateViewController(identifier: "CKImagePickerViewController") as? CKImagePickerViewController
+        guard let ckImagePickerViewController = storyboard.instantiateViewController(withIdentifier: String(describing: self))  as? CKImagePickerViewController
             else {
                 fatalError("Cannot create CKImagePickerViewContoller from Storyboard!")
         }
